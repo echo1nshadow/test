@@ -1,0 +1,10 @@
+#!/bin/bash
+# a test script
+# author:echo
+# date :2017.02.13
+
+PATH=/home/echo/jdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin/echo:/home/echo/dpj
+export PATH
+echo "hello world"
+echo $?
+exit 0

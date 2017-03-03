@@ -1,0 +1,3 @@
+sudo yum install git -y
+sudo mkdir /home/echo/git
+sudo git clone 
