@@ -120,10 +120,49 @@ void getType(const u_char * packet)
 	for( ; i < 14 ; ++i)
 	printf("%02x",packet[i]);
 	printf("  ");
-	if(packet[12] == 0x88)
+	if(packet[12] == 0x08&&packet[13] == 0x00)
 	{
-		if(packet[13] == 0x64)
-			printf("(PPPoE，PPP Over Ethernet<PPP Session Stage)");
+		printf("(IPv4)");
+	}
+	if(packet[12] == 0x08&&packet[13] == 0x06)
+	{
+		printf("(ARP ： Address Resolution Protocol)");
+	}
+	if(packet[12] == 0x08&&packet[13] == 0x08)
+	{
+		printf("(Frame Relay ARP） [RFC1701])");
+	}
+	if(packet[12] == 0x08&&packet[13] == 0x35)
+	{
+		printf("(DRARP：Dynamic RARP)    \n   (RARP：Reverse Address Resolution Protocol)");
+	}
+	if(packet[12] == 0x81&&packet[13] == 0x37)
+	{
+		printf("(IPX：Internet Packet Exchange)");
+	}
+	if(packet[12] == 0x81&&packet[13] == 0x4c)
+	{
+		printf("(SNMP：Simple Network Management Protocol)");
+	}
+	if(packet[12] == 0x86&&packet[13] == 0xdd)
+	{
+		printf("(IPv6)");
+	}
+	if(packet[12] == 0x88&&packet[13] == 0x0b)
+	{
+		printf("(PPP：Point-to-Point Protocol)");
+	}
+	if(packet[12] == 0x88&&packet[13] == 0x47)
+	{
+		printf("(MPLS：Multi-Protocol Label Switching <unicast>)");
+	}
+	if(packet[12] == 0x88&&packet[13] == 0x48)
+	{
+		printf("(MPLS, Multi-Protocol Label Switching <multicast>)");
+	}
+	if(packet[12] == 0x88&&packet[13] == 0x64)
+	{
+		printf("(PPPoE)");
 	}
 	printf("\n");
 }
