@@ -46,8 +46,12 @@ int main(int argc , char **argv)
 		printf("pcap_open_live success\n");
 	struct pcap_pkthdr pkthdr;
 	const unsigned char* packet_content = NULL;
-	int count = 5;
+	int count = -1;
 	int id = 0;
+	int datalink_type = 0;
+	datalink_type = pcap_datalink(handle);
+	printf("Data link type:%s	",pcap_datalink_val_to_name(datalink_type));
+	printf("%s\n",pcap_datalink_val_to_description(datalink_type));
 	pcap_loop(handle, count , getPacket, (u_char*)&id); 
 	pcap_close(handle);
 	return 0;
