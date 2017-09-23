@@ -1,5 +1,6 @@
 #include<pcap.h>
 #include<time.h>
+#include<stdlib.h>
 void getPacket(u_char* , const struct pcap_pkthdr *, const u_char *);
 void display(const struct  pcap_pkthdr * , const u_char * );
 void analyse(const u_char *);
@@ -11,20 +12,6 @@ void getType(const u_char * );
 
 int main(int argc , char **argv)
 {
-	
-/*
-	int id = 0;  
-	int count = 5;
-	int ch;
-	while((ch=getopt(argc,argv,"a:hn")) != -1)
-	{
-		switch(ch)
-		{
-			case 'h'
-				device 
-		
-
-*/
 	pcap_t * handle;
 	char err_message[PCAP_ERRBUF_SIZE] = {0};
 	char * device ;
@@ -39,11 +26,32 @@ int main(int argc , char **argv)
 	{
 		device = argv[1];
 	}
+	
+/*	获取网络号	*/
+/*
+	bpf_u_int32 netp , maskp;
+	if((pcap_lookupnet(device,&netp,&maskp,err_message) == -1))
+	{
+		printf("error:%s\n",err_message);
+		exit(-1);
+	}
+	printf("net : %d\n",netp);
+	printf("mask: %d\n",maskp);
+*/
+	
+
 	handle = pcap_open_live(device,65535,1,0,err_message);
 	if(handle == NULL)
 		printf("%s\n",err_message);
 	else
 		printf("pcap_open_live success\n");
+
+	/*		fliter		*/
+	struct bpf_program filter;
+	pcap_compile(handle,&filter, "src port 80",1,0);
+	pcap_setfilter(handle,&filter);
+
+
 	struct pcap_pkthdr pkthdr;
 	const unsigned char* packet_content = NULL;
 	int count = -1;
@@ -56,6 +64,8 @@ int main(int argc , char **argv)
 	pcap_close(handle);
 	return 0;
 }
+
+
 void getPacket(u_char* argv , const struct pcap_pkthdr * pkthdr, const u_char * packet)
 {
 	int * id =  (int *) argv;
