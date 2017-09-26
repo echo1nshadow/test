@@ -8,6 +8,7 @@ void getDestAddr(const u_char * );
 void getSrcAddr(const u_char * );
 void getType(const u_char * );
 void getIphead(const u_char *);
+void getTranHead(const u_char *);
 
 
 
@@ -78,6 +79,7 @@ void getPacket(u_char* argv , const struct pcap_pkthdr * pkthdr, const u_char * 
 	analyse(packet);
 	printf("IP header:\n");
 	getIphead(packet);
+	getTranHead(packet);
 	display(pkthdr, packet);
 
 }
@@ -192,13 +194,39 @@ void getIphead(const u_char * packet)
 	printf("Total length:%d\n",total_length);
 	printf("Identification:0x%02x%02x\n",packet[18],packet[19]);
 	printf("Flags:\n");
-	printf("Reserved bit:   %d\n",(packet[20] & 0x80)!=0);
-	printf("Don't fragment :%d\n",(packet[20] & 0x40)!=0);
-	printf("More fragments: %d\n",(packet[20] & 0x20!=0));
-
+	printf("Reserved bit   : %d\n",(packet[20] & 0x80)!=0);
+	printf("Don't fragment : %d\n",(packet[20] & 0x40)!=0);
+	printf("More fragments : %d\n",(packet[20] & 0x20)!=0);
+	printf("Fragment offset: %d\n",packet[21]);
+	printf("Time to live   : %d\n",packet[22]);
+	printf("Protocol:TCP(%d)\n",packet[23]);
+	printf("Head checksum:%02x%02x\n",packet[24],packet[25]);
+	printf("Source IP       :");
+	printf("%d.",packet[26]);
+	printf("%d.",packet[27]);
+	printf("%d.",packet[28]);
+	printf("%d\n",packet[29]);
+	printf("Destination IP  :");
+	printf("%d.",packet[30]);
+	printf("%d.",packet[31]);
+	printf("%d.",packet[32]);
+	printf("%d\n",packet[33]);
 }
 
-
+void getTranHead(const u_char * packet)
+{
+	int src_port = 0;
+	src_port = packet[34] | src_port ;
+	src_port <<= 8;
+	src_port = packet[35] | src_port ;
+	printf("Source port     :%d\n",src_port);
+	int dest_port = 0;
+	dest_port = packet[36] | dest_port ;
+	dest_port <<= 8;
+	dest_port = packet[37] | dest_port ;
+	printf("Destination port:%d\n",dest_port);
+}
+	
 
 
 
