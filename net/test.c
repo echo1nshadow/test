@@ -7,6 +7,7 @@ void analyse(const u_char *);
 void getDestAddr(const u_char * );
 void getSrcAddr(const u_char * );
 void getType(const u_char * );
+void getIphead(const u_char *);
 
 
 
@@ -48,8 +49,10 @@ int main(int argc , char **argv)
 
 	/*		fliter		*/
 	struct bpf_program filter;
+
 	pcap_compile(handle,&filter, "src port 80",1,0);
 	pcap_setfilter(handle,&filter);
+
 
 
 	struct pcap_pkthdr pkthdr;
@@ -73,6 +76,8 @@ void getPacket(u_char* argv , const struct pcap_pkthdr * pkthdr, const u_char * 
 	printf("packet's length:%d\n",pkthdr->len);
 	printf("time: %s",ctime((const time_t *)&(pkthdr->ts.tv_sec)));
 	analyse(packet);
+	printf("IP header:\n");
+	getIphead(packet);
 	display(pkthdr, packet);
 
 }
@@ -80,6 +85,7 @@ void getPacket(u_char* argv , const struct pcap_pkthdr * pkthdr, const u_char * 
 void display(const struct pcap_pkthdr * pkthdr , const u_char * packet)
 {
 	int i = 0 ;
+	int j = 0;
 	for( ; i< pkthdr->len ; i++)
 	{
 		printf(" %02x",packet[i]);
@@ -88,7 +94,17 @@ void display(const struct pcap_pkthdr * pkthdr , const u_char * packet)
 		if((i+1)%16 == 0)
 			printf("\n");
 	}
-	printf("\n\n\n");
+/*
+	for( ; j<pkthdr->len ; j++)
+	{
+		printf("%c",packet[j]);
+		if((i+1)%8 == 0)
+			printf("  ");
+		if((i+1)%16 == 0)
+			printf("\n");
+	}
+*/
+	printf("\n");
 }
 
 void analyse(const u_char * packet)
@@ -142,22 +158,6 @@ void getType(const u_char * packet)
 	{
 		printf("(ARP ： Address Resolution Protocol)");
 	}
-	if(packet[12] == 0x08&&packet[13] == 0x08)
-	{
-		printf("(Frame Relay ARP） [RFC1701])");
-	}
-	if(packet[12] == 0x08&&packet[13] == 0x35)
-	{
-		printf("(DRARP：Dynamic RARP)    \n   (RARP：Reverse Address Resolution Protocol)");
-	}
-	if(packet[12] == 0x81&&packet[13] == 0x37)
-	{
-		printf("(IPX：Internet Packet Exchange)");
-	}
-	if(packet[12] == 0x81&&packet[13] == 0x4c)
-	{
-		printf("(SNMP：Simple Network Management Protocol)");
-	}
 	if(packet[12] == 0x86&&packet[13] == 0xdd)
 	{
 		printf("(IPv6)");
@@ -166,14 +166,6 @@ void getType(const u_char * packet)
 	{
 		printf("(PPP：Point-to-Point Protocol)");
 	}
-	if(packet[12] == 0x88&&packet[13] == 0x47)
-	{
-		printf("(MPLS：Multi-Protocol Label Switching <unicast>)");
-	}
-	if(packet[12] == 0x88&&packet[13] == 0x48)
-	{
-		printf("(MPLS, Multi-Protocol Label Switching <multicast>)");
-	}
 	if(packet[12] == 0x88&&packet[13] == 0x64)
 	{
 		printf("(PPPoE)");
@@ -181,7 +173,30 @@ void getType(const u_char * packet)
 	printf("\n");
 }
 
+void getIphead(const u_char * packet)
+{
+	int version = 0;
+	version = packet[14] & 0xf0;
+	version >>= 4;
+	int header_length = 0;
+	header_length = packet[14] & 0x0f;
+	printf("Version:IPv%d\n",version);
+	printf("Header length:%d\n",header_length * 4);
+	printf("Differentiated Services Field: %02x\n",packet[15]);
+	printf("Differentiated Services Codepoint: %d\n",(packet[15]&0xfc)>>2);
+	printf("Explicit Congestion Notification: %d\n",(packet[15]&0x03));
+	int total_length = 0;
+	total_length |= packet[16];
+	total_length <<= 8;
+	total_length |= packet[17];
+	printf("Total length:%d\n",total_length);
+	printf("Identification:0x%02x%02x\n",packet[18],packet[19]);
+	printf("Flags:\n");
+	printf("Reserved bit:   %d\n",(packet[20] & 0x80)!=0);
+	printf("Don't fragment :%d\n",(packet[20] & 0x40)!=0);
+	printf("More fragments: %d\n",(packet[20] & 0x20!=0));
 
+}
 
 
 
